@@ -1,2 +1,1 @@
-# messenger
-A fullstack real time chat app
+# messenger: A fullstack real time chat app
