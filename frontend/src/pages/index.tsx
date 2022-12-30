@@ -1,19 +1,19 @@
 import type { NextPage, NextPageContext } from "next"
 import { getSession, signIn, signOut, useSession } from "next-auth/react"
+import { Box } from "@chakra-ui/react"
+import Chat from "../components/Chat/Chat"
+import Auth from "../components/Auth/Auth"
 
 const Home: NextPage = () => {
-	const { data } = useSession()
-	console.log("🚀 ~ file: index.tsx:6 ~ data", data)
+	const { data: session } = useSession()
+	console.log("🚀 ~ file: index.tsx:6 ~ data", session)
+
+  const reloadSession = () => {}
 
 	return (
-		<div>
-			{data?.user ? (
-				<button onClick={() => signOut()}>Sign Out</button>
-			) : (
-				<button onClick={() => signIn("google")}>Sign In</button>
-			)}
-			{data?.user?.name}
-		</div>
+    <Box>
+      {session?.user ? <Chat /> : <Auth session={session} reloadSession={reloadSession} />}
+    </Box>
 	)
 }
 
