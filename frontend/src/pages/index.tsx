@@ -12,7 +12,7 @@ const Home: NextPage = () => {
 
 	return (
     <Box>
-      {session?.user ? <Chat /> : <Auth session={session} reloadSession={reloadSession} />}
+      {session && session?.user?.username ? <Chat /> : <Auth session={session} reloadSession={reloadSession} />}
     </Box>
 	)
 }
