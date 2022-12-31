@@ -8,23 +8,31 @@ const Home: NextPage = () => {
 	const { data: session } = useSession()
 	console.log("🚀 ~ file: index.tsx:6 ~ data", session)
 
-  const reloadSession = () => {}
+	const reloadSession = () => {
+		const event = new Event("visibilitychange")
+		document.dispatchEvent(event)
+	}
 
 	return (
-    <Box>
-      {session && session?.user?.username ? <Chat /> : <Auth session={session} reloadSession={reloadSession} />}
-    </Box>
+		<Box>
+      {session?.user.username}
+			{session && session?.user?.username ? (
+				<Chat />
+			) : (
+				<Auth session={session} reloadSession={reloadSession} />
+			)}
+		</Box>
 	)
 }
 
 export async function getServerSideProps(context: NextPageContext) {
-  const session = await getSession(context)
+	const session = await getSession(context)
 
-  return {
-    props: {
-      session,
-    }
-  }
+	return {
+		props: {
+			session,
+		},
+	}
 }
 
 export default Home
