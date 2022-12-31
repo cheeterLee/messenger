@@ -34,7 +34,7 @@ const ConversationList: React.FunctionComponent<IConversationListProps> = ({
 					Find or start a conversation
 				</Text>
 			</Box>
-			<ConversationModal isOpen={isOpen} onClose={onClose} />
+			<ConversationModal session={session} isOpen={isOpen} onClose={onClose} />
 		</Box>
 	)
 }
