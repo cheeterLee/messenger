@@ -17,7 +17,7 @@ const resolvers = {
 			const { user: { id: userId } } = session
 
 			try {
-
+				// const conversations = await prisma.
 
 			} catch (error: any) {
 				console.log('conversation error', error)
