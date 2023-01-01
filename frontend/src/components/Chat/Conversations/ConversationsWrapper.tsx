@@ -30,7 +30,7 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 			px={3}
 		>
 			{/* skeleton loader */}
-			<ConversationList session={session} />
+			<ConversationList session={session} conversations={conversationsData?.conversations || []} />
 		</Box>
 	)
 }
