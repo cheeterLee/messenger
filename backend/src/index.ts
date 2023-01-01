@@ -9,41 +9,76 @@ import http from "http"
 import typeDefs from "./graphql/typeDefs"
 import resolvers from "./graphql/resolvers"
 import * as dotenv from "dotenv"
-import { getSession } from 'next-auth/react'
-import { GraphQLContext, Session } from "./util/types"
-import { PrismaClient } from '@prisma/client'
+import { getSession } from "next-auth/react"
+import { GraphQLContext, Session, SubscriptionContext } from "./util/types"
+import { PrismaClient } from "@prisma/client"
+import { PubSub } from 'graphql-subscriptions'
+import { useServer } from "graphql-ws/lib/use/ws"
+import { WebSocketServer } from "ws"
 
 async function main() {
 	dotenv.config()
 	const app = express()
 	const httpServer = http.createServer(app)
 
+	// Create our WebSocket server using the HTTP server we just set up.
+	const wsServer = new WebSocketServer({
+		server: httpServer,
+		path: "/graphql/subscriptions",
+	})
+
 	const schema = makeExecutableSchema({
 		typeDefs,
 		resolvers,
 	})
+	// context parameters
+	const prisma = new PrismaClient()
+	const pubsub = new PubSub()
+
+	const serverCleanup = useServer(
+		{
+			schema,
+			context: async (ctx: SubscriptionContext): Promise<GraphQLContext> => {
+				if (ctx.connectionParams && ctx.connectionParams.session) {
+					const { session } = ctx.connectionParams
+					return { session, prisma, pubsub }
+				}
+
+				return { session: null, prisma, pubsub }
+			},
+		},
+		wsServer
+	)
 
 	const corsOptions = {
 		origin: process.env.CLIENT_ORIGIN,
 		credentials: true,
 	}
 
-	// context parameters
-	const prisma = new PrismaClient()
 
 	const server = new ApolloServer({
 		schema,
 		csrfPrevention: true,
 		cache: "bounded",
 		context: async ({ req, res }): Promise<GraphQLContext> => {
-			const session = await getSession({ req }) as Session
-			console.log("🚀 ~ file: index.ts:35 ~ context: ~ session", session)
-			
-			return { session, prisma }
+			const session = (await getSession({ req })) as Session
+
+			return { session, prisma, pubsub }
 		},
 		plugins: [
+			// Proper shutdown for the HTTP server.
 			ApolloServerPluginDrainHttpServer({ httpServer }),
-			ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+
+			// Proper shutdown for the WebSocket server.
+			{
+				async serverWillStart() {
+					return {
+						async drainServer() {
+							await serverCleanup.dispose()
+						},
+					}
+				},
+			},
 		],
 	})
 
