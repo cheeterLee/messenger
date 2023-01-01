@@ -25,6 +25,7 @@ import {
 import Participants from "./Participants"
 import UserSearchList from "./UserSearchList"
 import { Session } from "next-auth"
+import { useRouter } from "next/router"
 
 interface IModalProps {
 	session: Session
@@ -40,6 +41,9 @@ const ConversationModal: React.FunctionComponent<IModalProps> = ({
 	const {
 		user: { id: userId },
 	} = session
+
+	const router = useRouter()
+
 	const [username, setUsername] = useState("")
 	const [participants, setParticipants] = useState<Array<SearchedUser>>([])
 	const [searchUsers, { data, error, loading }] = useLazyQuery<
@@ -60,7 +64,21 @@ const ConversationModal: React.FunctionComponent<IModalProps> = ({
 					participantIds,
 				},
 			})
-            console.log("🚀 ~ file: Modal.tsx:63 ~ onCreateConversation ~ data", data)
+
+			if (!data?.createConversation) {
+				throw new Error("failed to create conversation")
+			}
+
+			const {
+				createConversation: { conversationId },
+			} = data
+
+			router.push({ query: { conversationId } })
+
+			// clear state and close modal on successful creation
+			setParticipants([])
+			setUsername('')
+			onClose()
 		} catch (error: any) {
 			console.log("oncreateconversation error", error)
 			toast.error(error?.message)
