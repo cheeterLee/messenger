@@ -60,7 +60,7 @@ const resolvers = {
                     }
                 })
 
-                return [{ body: "hey dude this is a super sick message XD" } as MessagePopulated]
+                return messages
 
 
             } catch (error: any) {
@@ -102,6 +102,19 @@ const resolvers = {
 					include: messagePopulated,
 				})
 
+                // Find conversation participant entity
+                const participant = await prisma.conversationParticipant.findFirst({
+                    where: {
+                        userId,
+                        conversationId
+                    }
+                })
+
+                // should always exists
+                if (!participant) {
+                    throw new GraphQLError('Participant does not exists')
+                }
+
 				// Update conversation entity
 				const conversation = await prisma.conversation.update({
 					where: {
@@ -112,7 +125,7 @@ const resolvers = {
 						participants: {
 							update: {
 								where: {
-									id: senderId,
+									id: participant?.id,
 								},
 								data: {
 									hasSeenLatestMessage: true,
@@ -121,7 +134,7 @@ const resolvers = {
 							updateMany: {
 								where: {
 									NOT: {
-										userId: senderId,
+										userId,
 									},
 								},
 								data: {
@@ -130,6 +143,7 @@ const resolvers = {
 							},
 						},
 					},
+                    include: conversationPopulated,
 				})
 
 				pubsub.publish("MESSAGE_SENT", { messageSent: newMessage })
