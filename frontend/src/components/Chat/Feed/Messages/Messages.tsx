@@ -9,6 +9,7 @@ import MessageOperations from "../../../../graphql/operations/message"
 import { toast } from "react-hot-toast"
 import SkeletonLoader from "../../../common/SkeletonLoader"
 import { useEffect } from "react"
+import MessageItem from "./MessageItem"
 
 interface IMessagesProps {
 	userId: string
@@ -38,29 +39,29 @@ const Messages: React.FunctionComponent<IMessagesProps> = ({
 	const subscribeToMoreMessages = (conversationId: string) => {
 		subscribeToMore({
 			document: MessageOperations.Subscription.messageSent,
-            variables: {
-                conversationId
-            },
+			variables: {
+				conversationId,
+			},
 			updateQuery: (
 				prev,
 				{ subscriptionData }: MessageSubscriptionData
 			) => {
-                if (!subscriptionData) return prev
+				if (!subscriptionData) return prev
 
-                console.log('here is subscription data', subscriptionData)
-                
-                const newMessage = subscriptionData.data.messageSent
+				console.log("here is subscription data", subscriptionData)
 
-                return Object.assign({}, prev, {
-                    messages: [newMessage, ...prev.messages]
-                })
-            },
+				const newMessage = subscriptionData.data.messageSent
+
+				return Object.assign({}, prev, {
+					messages: [newMessage, ...prev.messages],
+				})
+			},
 		})
 	}
 
-    useEffect(() => {
-        subscribeToMoreMessages(conversationId)
-    }, [conversationId])
+	useEffect(() => {
+		subscribeToMoreMessages(conversationId)
+	}, [conversationId])
 
 	console.log("here is messages!", data)
 
@@ -78,8 +79,11 @@ const Messages: React.FunctionComponent<IMessagesProps> = ({
 					height="100%"
 				>
 					{data.messages.map((message) => (
-						// <MessageItem />
-						<div key={message.id}>{message.body}</div>
+						<MessageItem
+							key={message.id}
+							message={message}
+							sentByMe={message.sender.id === userId}
+						/>
 					))}
 				</Flex>
 			)}
