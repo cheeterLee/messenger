@@ -9,7 +9,7 @@ const typeDefs = gql`
 	}
 
     type Query {
-        messages(conversationId: string): [Message]
+        messages(conversationId: String): [Message]
     }
 
 	type Mutation {

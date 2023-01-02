@@ -7,6 +7,7 @@ import { ConversationsData } from "../../../util/types"
 import { ConversationPopulated } from "../../../../../backend/src/util/types"
 import { useEffect } from "react"
 import { useRouter } from "next/router"
+import SkeletonLoader from "../../common/SkeletonLoader"
 
 interface ConversationWraperProps {
 	session: Session
@@ -25,14 +26,15 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 	)
 
 	const router = useRouter()
-	const { query: { conversationId } } = router
-	
+	const {
+		query: { conversationId },
+	} = router
+
 	const onViewConversation = async (conversationId: string) => {
 		// 1. Push conversaionId to the router params
 		router.push({ query: { conversationId } })
 
 		// 2. Mark the conversation as read
-
 	}
 
 	const subscribeToNewConversations = () => {
@@ -48,7 +50,7 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 					}
 				}
 			) => {
-				if (!subscriptionData.data) return prev				
+				if (!subscriptionData.data) return prev
 
 				const newConversation =
 					subscriptionData.data.conversationCreated
@@ -69,16 +71,21 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 		<Box
 			width={{ base: "100%", md: "400px" }}
 			bg="whiteAlpha.50"
+			flexDirection='column'
+			gap={4}
 			py={6}
 			px={3}
 			display={{ base: conversationId ? "none" : "flex", md: "flex" }}
 		>
-			{/* skeleton loader */}
-			<ConversationList
-				session={session}
-				conversations={conversationsData?.conversations || []}
-				onViewConversation={onViewConversation}
-			/>
+			{conversationsLoading ? (
+				<SkeletonLoader count={7} height="80px" />
+			) : (
+				<ConversationList
+					session={session}
+					conversations={conversationsData?.conversations || []}
+					onViewConversation={onViewConversation}
+				/>
+			)}
 		</Box>
 	)
 }
