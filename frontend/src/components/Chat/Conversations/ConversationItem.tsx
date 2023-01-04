@@ -29,7 +29,7 @@ interface ConversationItemProps {
 	userId: string
 	conversation: ConversationPopulated
 	onClick: () => void
-    isSelected: boolean
+	isSelected: boolean
 	hasSeenLatestMessage?: boolean | undefined
 	// onEditConversation?: () => void
 	// selectedConversationId?: string
@@ -41,9 +41,9 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
 	userId,
 	conversation,
 	onClick,
-    isSelected
+	isSelected,
+	hasSeenLatestMessage,
 	// selectedConversationId,
-	// hasSeenLatestMessage,
 	// onEditConversation,
 	// onDeleteConversation,
 	// onLeaveConversation,
@@ -70,56 +70,54 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
 			p={4}
 			cursor="pointer"
 			borderRadius={4}
-			// bg={
-			// 	conversation.id === selectedConversationId
-			// 		? "whiteAlpha.200"
-			// 		: "none"
-			// }
+			bg={
+				isSelected ? 'whiteAlpha.200' : 'none'
+			}
 			_hover={{ bg: "whiteAlpha.200" }}
 			onClick={handleClick}
 			onContextMenu={handleClick}
 			position="relative"
 		>
-			{/* {showMenu && (
-				<Menu isOpen={menuOpen} onClose={() => setMenuOpen(false)}>
-					<MenuList bg="#2d2d2d">
+			
+			<Menu isOpen={menuOpen} onClose={() => setMenuOpen(false)}>
+				<MenuList bg="#2d2d2d">
+					<MenuItem
+						icon={<AiOutlineEdit fontSize={20} />}
+						onClick={(event) => {
+							event.stopPropagation()
+							// onEditConversation()
+						}}
+					>
+						Edit
+					</MenuItem>
+					{conversation.participants.length > 2 ? (
 						<MenuItem
-							icon={<AiOutlineEdit fontSize={20} />}
+							icon={<BiLogOut fontSize={20} />}
 							onClick={(event) => {
 								event.stopPropagation()
-								// onEditConversation()
+								// onLeaveConversation(conversation)
 							}}
 						>
-							Edit
+							Leave
 						</MenuItem>
-						{conversation.participants.length > 2 ? (
-							<MenuItem
-								icon={<BiLogOut fontSize={20} />}
-								onClick={(event) => {
-									event.stopPropagation()
-									// onLeaveConversation(conversation)
-								}}
-							>
-								Leave
-							</MenuItem>
-						) : (
-							<MenuItem
-								icon={<MdDeleteOutline fontSize={20} />}
-								onClick={(event) => {
-									event.stopPropagation()
-									// onDeleteConversation(conversation.id)
-								}}
-							>
-								Delete
-							</MenuItem>
-						)}
-					</MenuList>
-				</Menu>
-			)} */}
+					) : (
+						<MenuItem
+							icon={<MdDeleteOutline fontSize={20} />}
+							onClick={(event) => {
+								event.stopPropagation()
+								// onDeleteConversation(conversation.id)
+							}}
+						>
+							Delete
+						</MenuItem>
+					)}
+				</MenuList>
+			</Menu>
+			
 			<Flex position="absolute" left="-6px">
-				{/* {hasSeenLatestMessage === false && (
+				{hasSeenLatestMessage === false && (
 					<GoPrimitiveDot fontSize={18} color="#6B46C1" />
-				)} */}
+				)}
 			</Flex>
 			<Avatar />
 			<Flex justify="space-between" width="80%" height="100%">
@@ -145,16 +143,25 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
 						</Box>
 					)}
 				</Flex>
-				<Text color="whiteAlpha.700" textAlign="right" position='absolute' right={4}>
-					{formatRelative(new Date(conversation.updatedAt), new Date(), {
-						locale: {
-							...enUS,
-							formatRelative: (token) =>
-								formatRelativeLocale[
-									token as keyof typeof formatRelativeLocale
-								],
-						},
-					})}
+				<Text
+					color="whiteAlpha.700"
+					textAlign="right"
+					position="absolute"
+					right={4}
+				>
+					{formatRelative(
+						new Date(conversation.updatedAt),
+						new Date(),
+						{
+							locale: {
+								...enUS,
+								formatRelative: (token) =>
+									formatRelativeLocale[
+										token as keyof typeof formatRelativeLocale
+									],
+							},
+						}
+					)}
 				</Text>
 			</Flex>
 		</Stack>

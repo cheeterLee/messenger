@@ -45,12 +45,17 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 		conversationId: string,
 		hasSeenLatestMessage: boolean | undefined
 	) => {
-		// 1. Push conversaionId to the router params
+		/**
+		 * 1. Push the conversationId to the router query params
+		 */
 		router.push({ query: { conversationId } })
 
-		// 2. Mark the conversation as read
+		/**
+		 * 2. Mark the conversation as read
+		 */
 		if (hasSeenLatestMessage) return
 
+		// markConversationAsRead mutation
 		try {
 			await markConversationAsRead({
 				variables: {
@@ -61,14 +66,16 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 					markConversationAsRead: true,
 				},
 				update: (cache) => {
-					// Get conversation participants from cache
+					/**
+					 * Get conversation participants from cache
+					 */
 					const participantsFragment = cache.readFragment<{
 						participants: Array<ParticipantPopulated>
 					}>({
 						id: `Conversation:${conversationId}`,
 						fragment: gql`
-							fragment: Participants on Conversation {
-								participants: {
+							fragment Participants on Conversation {
+								participants {
 									user {
 										id
 										username
@@ -91,23 +98,27 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 
 					const userParticipant = participants[userParticipantIdx]
 
-					// update participant to show latest message as read
+					/**
+					 * Update participant to show latest message as read
+					 */
 					participants[userParticipantIdx] = {
 						...userParticipant,
-						hasSeenLatestMessage: true
+						hasSeenLatestMessage: true,
 					}
 
-					// update cache
+					/**
+					 * Update cache
+					 */
 					cache.writeFragment({
 						id: `Conversation:${conversationId}`,
 						fragment: gql`
-							fragment UpdateParticipant on Conversation {
+							fragment UpdatedParticipant on Conversation {
 								participants
 							}
 						`,
 						data: {
-							participants
-						}
+							participants,
+						},
 					})
 				},
 			})
