@@ -1,5 +1,5 @@
-import { gql } from "@apollo/client";
-import { MessageFields } from "./message";
+import { gql } from "@apollo/client"
+import { MessageFields } from "./message"
 
 const ConversationFields = `
     id
@@ -17,38 +17,49 @@ const ConversationFields = `
 `
 
 export default {
-    Queries: {
-        conversations: gql`
+	Queries: {
+		conversations: gql`
             query Conversations {
                 conversations {
                     ${ConversationFields}
                 }
             }
-        `
-    },
-    Mutations: {
-        createConversation: gql`
-            mutation CreateConversation($participantIds: [String]!) {
-                createConversation(participantIds: $participantIds) {
-                    conversationId
-                }
-            }
         `,
-        markConversationAsRead: gql`
-            mutation MarkConversationAsRead($userId: String!, $conversationId: String!) {
-                markConversationAsRead(userId: $userId, conversationId: $conversationId)
-            }
-        `
-    },
-    Subscriptions: {
-        conversationCreated: gql`
+	},
+	Mutations: {
+		createConversation: gql`
+			mutation CreateConversation($participantIds: [String]!) {
+				createConversation(participantIds: $participantIds) {
+					conversationId
+				}
+			}
+		`,
+		deleteConversation: gql`
+			mutation DeleteConversation($conversationId: String!) {
+				deleteConversation(conversationId: $conversationId)
+			}
+		`, 
+		markConversationAsRead: gql`
+			mutation MarkConversationAsRead(
+				$userId: String!
+				$conversationId: String!
+			) {
+				markConversationAsRead(
+					userId: $userId
+					conversationId: $conversationId
+				)
+			}
+		`,
+	},
+	Subscriptions: {
+		conversationCreated: gql`
             subscription conversationCreated {
                 conversationCreated {
                     ${ConversationFields}
                 }
             }
         `,
-        conversationUpdated: gql`
+		conversationUpdated: gql`
             subscription ConversationUpdated {
                 conversationUpdated {
                     conversation {
@@ -56,6 +67,13 @@ export default {
                     }
                 }
             }
-        `
-    },
+        `,
+		conversationDeleted: gql`
+			subscription ConversationDeleted {
+				conversationDeleted {
+					id
+				}
+			}
+		`,
+	},
 }
