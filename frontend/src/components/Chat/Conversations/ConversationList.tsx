@@ -125,7 +125,7 @@ const ConversationList: React.FunctionComponent<IConversationListProps> = ({
 				px={8}
 				// py={6}
 			>
-				<Button width="100%" onClick={() => signOut}>
+				<Button width="100%" onClick={() => signOut()}>
 					Logout
 				</Button>
 			</Box>
