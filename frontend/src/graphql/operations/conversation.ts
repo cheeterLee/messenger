@@ -40,11 +40,20 @@ export default {
             }
         `
     },
-    Subscription: {
+    Subscriptions: {
         conversationCreated: gql`
             subscription conversationCreated {
                 conversationCreated {
                     ${ConversationFields}
+                }
+            }
+        `,
+        conversationUpdated: gql`
+            subscription ConversationUpdated {
+                conversationUpdated {
+                    conversation {
+                        ${ConversationFields}
+                    }
                 }
             }
         `

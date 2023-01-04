@@ -1,9 +1,9 @@
-import { gql, useMutation, useQuery } from "@apollo/client"
+import { gql, useMutation, useQuery, useSubscription } from "@apollo/client"
 import { Box } from "@chakra-ui/react"
 import { Session } from "next-auth"
 import ConversationList from "./ConversationList"
 import ConversationOperations from "../../../graphql/operations/conversation"
-import { ConversationsData } from "../../../util/types"
+import { ConversationsData, ConversationUpdatedData } from "../../../util/types"
 import {
 	ConversationPopulated,
 	ParticipantPopulated,
@@ -40,6 +40,22 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 		{ markConversationAsRead: boolean },
 		{ userId: string; conversationId: string }
 	>(ConversationOperations.Mutations.markConversationAsRead)
+
+	useSubscription<ConversationUpdatedData, null>(ConversationOperations.Subscriptions.conversationUpdated, {
+		onData: ({ client, data }) => {
+			const { data: subscriptionData } = data
+			
+			if (!subscriptionData) return
+
+			const { conversationUpdated: {conversation: updatedConversation } } = subscriptionData
+
+			const currentlyViewingConversation = updatedConversation.id === conversationId
+			
+			if (currentlyViewingConversation) {
+				onViewConversation(conversationId, false)
+			}
+		}
+	})
 
 	const onViewConversation = async (
 		conversationId: string,
@@ -129,7 +145,7 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 
 	const subscribeToNewConversations = () => {
 		subscribeToMore({
-			document: ConversationOperations.Subscription.conversationCreated,
+			document: ConversationOperations.Subscriptions.conversationCreated,
 			updateQuery: (
 				prev,
 				{
