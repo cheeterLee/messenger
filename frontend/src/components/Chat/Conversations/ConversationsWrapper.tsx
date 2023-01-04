@@ -3,7 +3,11 @@ import { Box } from "@chakra-ui/react"
 import { Session } from "next-auth"
 import ConversationList from "./ConversationList"
 import ConversationOperations from "../../../graphql/operations/conversation"
-import { ConversationsData, ConversationUpdatedData } from "../../../util/types"
+import {
+	ConversationDeletedData,
+	ConversationsData,
+	ConversationUpdatedData,
+} from "../../../util/types"
 import {
 	ConversationPopulated,
 	ParticipantPopulated,
@@ -41,21 +45,62 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 		{ userId: string; conversationId: string }
 	>(ConversationOperations.Mutations.markConversationAsRead)
 
-	useSubscription<ConversationUpdatedData, null>(ConversationOperations.Subscriptions.conversationUpdated, {
-		onData: ({ client, data }) => {
-			const { data: subscriptionData } = data
-			
-			if (!subscriptionData) return
+	useSubscription<ConversationUpdatedData, null>(
+		ConversationOperations.Subscriptions.conversationUpdated,
+		{
+			onData: ({ client, data }) => {
+				const { data: subscriptionData } = data
 
-			const { conversationUpdated: {conversation: updatedConversation } } = subscriptionData
+				if (!subscriptionData) return
 
-			const currentlyViewingConversation = updatedConversation.id === conversationId
-			
-			if (currentlyViewingConversation) {
-				onViewConversation(conversationId, false)
-			}
+				const {
+					conversationUpdated: { conversation: updatedConversation },
+				} = subscriptionData
+
+				const currentlyViewingConversation =
+					updatedConversation.id === conversationId
+
+				if (currentlyViewingConversation) {
+					onViewConversation(conversationId, false)
+				}
+			},
 		}
-	})
+	)
+
+	useSubscription<ConversationDeletedData, null>(
+		ConversationOperations.Subscriptions.conversationDeleted,
+		{
+			onData: ({ client, data }) => {
+				console.log("HERE IS SUB DATA", data)
+				const { data: subscriptionData } = data
+
+				if (!subscriptionData) return
+
+				const existing = client.readQuery<ConversationsData>({
+					query: ConversationOperations.Queries.conversations,
+				})
+
+				if (!existing) return
+
+				const { conversations } = existing
+				const {
+					conversationDeleted: { id: deletedConversationId },
+				} = subscriptionData
+
+				client.writeQuery<ConversationsData>({
+					query: ConversationOperations.Queries.conversations,
+					data: {
+						conversations: conversations.filter(
+							(conversation) =>
+								conversation.id !== deletedConversationId
+						),
+					},
+				})
+
+				router.push("/")
+			},
+		}
+	)
 
 	const onViewConversation = async (
 		conversationId: string,
