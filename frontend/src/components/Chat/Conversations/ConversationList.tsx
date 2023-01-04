@@ -9,7 +9,10 @@ import ConversationModal from "./Modal/Modal"
 interface IConversationListProps {
 	session: Session
 	conversations: Array<ConversationPopulated>
-	onViewConversation: (conversationId: string) => void
+	onViewConversation: (
+		conversationId: string,
+		hasSeenLatestMessage: boolean | undefined
+	) => void
 }
 
 const ConversationList: React.FunctionComponent<IConversationListProps> = ({
@@ -18,12 +21,14 @@ const ConversationList: React.FunctionComponent<IConversationListProps> = ({
 	onViewConversation,
 }) => {
 	const [isOpen, setIsOpen] = useState(false)
-	
+
 	const onOpen = () => setIsOpen(true)
 	const onClose = () => setIsOpen(false)
 
 	const router = useRouter()
-	const { user: { id: userId } } = session
+	const {
+		user: { id: userId },
+	} = session
 
 	return (
 		<Box width="100%">
@@ -49,15 +54,24 @@ const ConversationList: React.FunctionComponent<IConversationListProps> = ({
 				isOpen={isOpen}
 				onClose={onClose}
 			/>
-			{conversations.map((conversation) => (
-				<ConversationItem
-					key={conversation.id}
-					userId={userId}
-					conversation={conversation}
-					onClick={() => onViewConversation(conversation.id)}
-					isSelected={conversation.id === router.query.conversaionId}
-				/>
-			))}
+			{conversations.map((conversation) => {
+				const participant = conversation.participants.find(
+					(p) => p.user.id === userId
+				)
+
+				return (
+					<ConversationItem
+						key={conversation.id}
+						userId={userId}
+						conversation={conversation}
+						onClick={() => onViewConversation(conversation.id, participant?.hasSeenLatestMessage)}
+						hasSeenLatestMessage={participant?.hasSeenLatestMessage}
+						isSelected={
+							conversation.id === router.query.conversaionId
+						}
+					/>
+				)
+			})}
 		</Box>
 	)
 }

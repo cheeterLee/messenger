@@ -1,10 +1,13 @@
-import { useQuery } from "@apollo/client"
+import { gql, useMutation, useQuery } from "@apollo/client"
 import { Box } from "@chakra-ui/react"
 import { Session } from "next-auth"
 import ConversationList from "./ConversationList"
 import ConversationOperations from "../../../graphql/operations/conversation"
 import { ConversationsData } from "../../../util/types"
-import { ConversationPopulated } from "../../../../../backend/src/util/types"
+import {
+	ConversationPopulated,
+	ParticipantPopulated,
+} from "../../../../../backend/src/util/types"
 import { useEffect } from "react"
 import { useRouter } from "next/router"
 import SkeletonLoader from "../../common/SkeletonLoader"
@@ -16,6 +19,14 @@ interface ConversationWraperProps {
 const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 	session,
 }) => {
+	const router = useRouter()
+	const {
+		query: { conversationId },
+	} = router
+	const {
+		user: { id: userId },
+	} = session
+
 	const {
 		data: conversationsData,
 		error: conversationsError,
@@ -25,16 +36,84 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 		ConversationOperations.Queries.conversations
 	)
 
-	const router = useRouter()
-	const {
-		query: { conversationId },
-	} = router
+	const [markConversationAsRead] = useMutation<
+		{ markConversationAsRead: boolean },
+		{ userId: string; conversationId: string }
+	>(ConversationOperations.Mutations.markConversationAsRead)
 
-	const onViewConversation = async (conversationId: string) => {
+	const onViewConversation = async (
+		conversationId: string,
+		hasSeenLatestMessage: boolean | undefined
+	) => {
 		// 1. Push conversaionId to the router params
 		router.push({ query: { conversationId } })
 
 		// 2. Mark the conversation as read
+		if (hasSeenLatestMessage) return
+
+		try {
+			await markConversationAsRead({
+				variables: {
+					userId,
+					conversationId,
+				},
+				optimisticResponse: {
+					markConversationAsRead: true,
+				},
+				update: (cache) => {
+					// Get conversation participants from cache
+					const participantsFragment = cache.readFragment<{
+						participants: Array<ParticipantPopulated>
+					}>({
+						id: `Conversation:${conversationId}`,
+						fragment: gql`
+							fragment: Participants on Conversation {
+								participants: {
+									user {
+										id
+										username
+									}
+									hasSeenLatestMessage
+								}
+							}
+						`,
+					})
+
+					if (!participantsFragment) return
+
+					const participants = [...participantsFragment.participants]
+
+					const userParticipantIdx = participants.findIndex(
+						(p) => p.user.id === userId
+					)
+
+					if (userParticipantIdx === -1) return
+
+					const userParticipant = participants[userParticipantIdx]
+
+					// update participant to show latest message as read
+					participants[userParticipantIdx] = {
+						...userParticipant,
+						hasSeenLatestMessage: true
+					}
+
+					// update cache
+					cache.writeFragment({
+						id: `Conversation:${conversationId}`,
+						fragment: gql`
+							fragment UpdateParticipant on Conversation {
+								participants
+							}
+						`,
+						data: {
+							participants
+						}
+					})
+				},
+			})
+		} catch (error) {
+			console.log("onViewConversation error", error)
+		}
 	}
 
 	const subscribeToNewConversations = () => {
@@ -71,7 +150,7 @@ const ConversationWraper: React.FunctionComponent<ConversationWraperProps> = ({
 		<Box
 			width={{ base: "100%", md: "400px" }}
 			bg="whiteAlpha.50"
-			flexDirection='column'
+			flexDirection="column"
 			gap={4}
 			py={6}
 			px={3}
