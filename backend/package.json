@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "postinstall": "tsc",
     "start": "node src/index.ts",
     "dev": "nodemon src/index.ts"
   },
