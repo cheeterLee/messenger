@@ -15,7 +15,7 @@ import { PubSub } from 'graphql-subscriptions'
 import { useServer } from "graphql-ws/lib/use/ws"
 import { WebSocketServer } from "ws"
 import cors from 'cors'
-import { json } from "body-parser"
+import json from "body-parser"
 
 async function main() {
 	dotenv.config()
