@@ -15,7 +15,7 @@ import { PubSub } from 'graphql-subscriptions'
 import { useServer } from "graphql-ws/lib/use/ws"
 import { WebSocketServer } from "ws"
 import cors from 'cors'
-import json from "body-parser"
+// import json from "body-parser"
 
 async function main() {
 	dotenv.config()
@@ -82,10 +82,12 @@ async function main() {
 		credentials: true,
 	}
 	
+	app.use(express.urlencoded({extended: true}))
+
 	app.use(
 		"/graphql",
 		cors<cors.CorsRequest>(corsOptions),
-		json(),
+		express.json(),
 		expressMiddleware(server, {
 			context: async ({ req }): Promise<GraphQLContext> => {
 				const session = await getSession({ req })
