@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "postinstall": "tsc",
+    "postinstall": "prisma generate --schema=src/prisma/schema.prisma",
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts"
   },
