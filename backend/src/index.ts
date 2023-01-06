@@ -77,8 +77,8 @@ async function main() {
 	await server.start()
 
 	const corsOptions = {
-		// origin: process.env.CLIENT_ORIGIN,
-		origin: true,
+		origin: process.env.CLIENT_ORIGIN,
+		// origin: true,
 		credentials: true,
 	}
 	
