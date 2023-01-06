@@ -102,8 +102,8 @@ function main() {
         });
         yield server.start();
         const corsOptions = {
-            // origin: process.env.CLIENT_ORIGIN,
-            origin: true,
+            origin: process.env.CLIENT_ORIGIN,
+            // origin: true,
             credentials: true,
         };
         app.use(express_1.default.urlencoded({ extended: true }));
