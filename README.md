@@ -1,6 +1,7 @@
 # Messenger: A fullstack real time chat app
 
-Next, TypeScript, Prisma, MongoDB, Node, GraphQL, styled with ChakraUI
+- Powered by Next, TypeScript, Prisma, MongoDB, Node, GraphQL, styled with ChakraUI
+- Deployed at https://messenger-beta-drab.vercel.app
 
 ## Chat between multi users
 
