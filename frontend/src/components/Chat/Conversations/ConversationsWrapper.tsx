@@ -5,13 +5,15 @@ import ConversationList from "./ConversationList"
 import ConversationOperations from "../../../graphql/operations/conversation"
 import {
 	ConversationDeletedData,
+	ConversationPopulated,
 	ConversationsData,
 	ConversationUpdatedData,
-} from "../../../util/types"
-import {
-	ConversationPopulated,
 	ParticipantPopulated,
-} from "../../../../../backend/src/util/types"
+} from "../../../util/types"
+// import {
+// 	ConversationPopulated,
+// 	ParticipantPopulated,
+// } from "../../../../../backend/src/util/types"
 import { useEffect } from "react"
 import { useRouter } from "next/router"
 import SkeletonLoader from "../../common/SkeletonLoader"
