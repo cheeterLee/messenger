@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "migrate": "prisma generate --schema=src/prisma/schema.prisma && prisma db push --schema=src/prisma/schema.prisma",
+    "postinstall": "prisma generate --schema=src/prisma/schema.prisma",
+    "migrate": "prisma db push --schema=src/prisma/schema.prisma",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
