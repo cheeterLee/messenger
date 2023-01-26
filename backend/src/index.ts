@@ -22,7 +22,7 @@ async function main() {
 	const app = express()
 	const httpServer = http.createServer(app)
 
-	// Create our WebSocket server using the HTTP server we just set up.
+	// Create our WebSocket server using the HTTP server just set up.
 	const wsServer = new WebSocketServer({
 		server: httpServer,
 		path: "/graphql/subscriptions",
