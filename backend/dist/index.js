@@ -56,7 +56,7 @@ function main() {
         dotenv.config();
         const app = (0, express_1.default)();
         const httpServer = http_1.default.createServer(app);
-        // Create our WebSocket server using the HTTP server we just set up.
+        // Create our WebSocket server using the HTTP server just set up.
         const wsServer = new ws_2.WebSocketServer({
             server: httpServer,
             path: "/graphql/subscriptions",

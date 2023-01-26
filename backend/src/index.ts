@@ -51,9 +51,6 @@ async function main() {
 		wsServer
 	)
 
-	
-
-
 	const server = new ApolloServer({
 		schema,
 		csrfPrevention: true,
