@@ -10,10 +10,6 @@ import {
 	ConversationUpdatedData,
 	ParticipantPopulated,
 } from "../../../util/types"
-// import {
-// 	ConversationPopulated,
-// 	ParticipantPopulated,
-// } from "../../../../../backend/src/util/types"
 import { useEffect } from "react"
 import { useRouter } from "next/router"
 import SkeletonLoader from "../../common/SkeletonLoader"

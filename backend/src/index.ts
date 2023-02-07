@@ -1,7 +1,6 @@
 import { ApolloServer } from '@apollo/server'
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
 import { expressMiddleware } from '@apollo/server/express4'
-
 import { makeExecutableSchema } from "@graphql-tools/schema"
 import express from "express"
 import http from "http"
@@ -15,7 +14,6 @@ import { PubSub } from 'graphql-subscriptions'
 import { useServer } from "graphql-ws/lib/use/ws"
 import { WebSocketServer } from "ws"
 import cors from 'cors'
-// import json from "body-parser"
 
 async function main() {
 	dotenv.config()
@@ -88,6 +86,7 @@ async function main() {
 		expressMiddleware(server, {
 			context: async ({ req }): Promise<GraphQLContext> => {
 				const session = await getSession({ req })
+				console.log('session grabbed in backend', session)
 				return { session: session as Session, prisma, pubsub }
 			}
 		})
