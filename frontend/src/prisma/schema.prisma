@@ -25,7 +25,7 @@ model Account {
 
   @@unique([provider, providerAccountId])
 }
-
+3
 model Session {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   sessionToken String   @unique
